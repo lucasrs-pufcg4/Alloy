@@ -47,18 +47,18 @@ fact EmprstimoValido{
 -- assert(PROPEIEDADE A SER TESTADA )
 --===============
 
-//assert LivroNaoDuplicado{
-//	all e1, e2: Emprestimo | 
-//		e1.livro = e2.livro implies e1 = e2 
-//}
+assert LivroNaoDuplicado{
+	all e1, e2: Emprestimo | 
+		e1.livro = e2.livro implies e1 = e2 
+}
 
 --Verificar as propriedade
-//check LivroNaoDuplicado for 5
+check LivroNaoDuplicado for 5
 --===========
 -- gerar exemplo 
 --===========
 
-//run{} for 5 
+run{} for 5 
 
 pred show(){}
 
