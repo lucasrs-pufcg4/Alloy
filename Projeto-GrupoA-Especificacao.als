@@ -1,29 +1,49 @@
 -- Sistema para gerenciamento de Eventos acadêmicos
 
 --(1) Assinatura 
-abstract sig Evento{
+ sig Evento{
 	organizador: one Professor,--Unico professor organizador  
 	sala: one Sala, -- Unica Sala para um evento 
-	partipante: set Participante, --Conjuntos de Participante
+	inscritos: set Participante, --Conjuntos de Participante
 	horario: one Horario, -- Unico horario para aquele evento 
-	maxVagas: Int  --Maximo de participantes
+	maxVagas: Int,  --Maximo de participantes
+	listaEspera: set Participante -- Participante que esta esperando 
 }
 
---Abstract nâo pode haver interseção entre eles 
-one sig Palestra, Workshops extends Evento{}
 sig Professor{}
 sig Horario{}
 sig Sala {}
-sig Partipante{}
+sig Participante{}
+
 
 --Fatos (restrições)
--- Cada evento tem EXATAMENTE um professor organizador.
---Um professor pode organizar MAIS DE UM evento, a MENOS que eles ocorram no mesmo horário. 
---Sala e horário fixos para CADA evento.
---Número de vagas não pode ser ultrapassado
+
+--Exatamente um professor por eventoe não  
+fact UnicoProfessorEmUmEvento{
+	all e1, e2: Evento | (e1.organizador = e2.organizador) and not (e1.horario = e2.horario)
+}
+-- Um evento em um Horario 
+fact UnicoEventoSala{
+	all e1, e2: Evento | (e1.sala = e2.sala) and not (e1.horario = e2.horario)
+}
+--números de vagas não pode ser ultrapassada 
+
+fact VagasLimidada{
+	all e: Evento | #(e.inscritos) <= e.maxVagas
+}
 --Os participantes podem participar de mais de um evento, desde que não haja horários iguais.
---O participante não pode estar inscrito E na lista de espera do mesmo evento.
---EXISTE lista de espera.
---TODOS os eventos devem ter sala, horário e organizador.
+
+fact InscricaoParticipantes{
+all e, e2: Evento | not (e.horario = e2.horario) and (e.inscritos = e2.inscritos) 
+}
+
+--O participante NÃO pode estar inscrito E na lista de espera do mesmo evento.
+fact DuplicidadeDeInscricaes{
+all e : Evento, p : Participante  | (p in e.inscritos or p in e.listaEspera)  and not(p in e.inscritos and p in e.listaEspera) 
+}
+
+
 --TODAS as inscrições devem ter participante e evento associado.
- 
+pred show(){}
+
+run show for 5 
