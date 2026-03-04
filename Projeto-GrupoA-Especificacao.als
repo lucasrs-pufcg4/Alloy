@@ -26,39 +26,50 @@ sig Participante{}
 --------------------------------------------------
 
 --Se dois eventos têm o mesmo organizador, então devem ter horários diferentes.
-fact UnicoProfessorEmUmEvento{
+pred UnicoProfessorEmUmEvento{
 	all disj e1, e2: Evento | e1.organizador = e2.organizador implies e1.horario != e2.horario
 }
 --Garante que todo evento tenha pelo menos 1 vaga. Evita eventos com capacidade zero ou negativa.
 
-fact MaximoDeVagaPositivo{
+pred MaximoDeVagaPositivo{
 	all e : Evento | e.maxVagas > 0
 }
 
 --Se dois eventos estão na mesma sala, então seus horários devem ser diferentes
 
-fact UnicoEventoSala{
+pred UnicoEventoSala{
 	all disj e1, e2: Evento | e1.sala = e2.sala implies e1.horario != e2.horario
 }
 
 --números de vagas não pode ser ultrapassada 
-fact VagasLimidada{
+pred VagasLimidada{
 	all e: Evento | #(e.inscritos) <= e.maxVagas
 }
 
 --Um mesmo participante não pode estar inscrito em dois eventos no mesmo horário.
-fact InscricaoParticipantes{
+pred InscricaoParticipantes{
 all disj  e, e2: Evento , p: Participante | (p in e.inscritos and p in e2.inscritos) implies e.horario != e2.horario
 }
 
 --Caso ultrapasse o limite, os excedentes podem compor lista de espera.
-fact ListaEsperaSoQuandoLotado{
+pred  ListaEsperaSoQuandoLotado{
 	all e : Evento | some e.listaDeEspera implies #(e.inscritos) = e.maxVagas
 }
 
 --O participante NÃO pode estar inscrito E na lista de espera do mesmo evento.
-fact DuplicidadeDeInscricaes{
+pred DuplicidadeDeInscricaes{
 all e : Evento, p : Participante  | not (p in e.inscritos and p in e.listaDeEspera) 
+}
+
+fact{
+	DuplicidadeDeInscricaes
+	ListaEsperaSoQuandoLotado 
+	InscricaoParticipantes 
+	VagasLimidada 
+	UnicoEventoSala 
+	MaximoDeVagaPositivo 
+	UnicoProfessorEmUmEvento 
+
 }
 
 
