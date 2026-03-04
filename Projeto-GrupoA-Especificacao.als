@@ -29,14 +29,13 @@ sig Participante{}
 pred UnicoProfessorEmUmEvento{
 	all disj e1, e2: Evento | e1.organizador = e2.organizador implies e1.horario != e2.horario
 }
---Garante que todo evento tenha pelo menos 1 vaga. Evita eventos com capacidade zero ou negativa.
 
+--Garante que todo evento tenha pelo menos 1 vaga. Evita eventos com capacidade zero ou negativa.
 pred MaximoDeVagaPositivo{
 	all e : Evento | e.maxVagas > 0
 }
 
 --Se dois eventos estão na mesma sala, então seus horários devem ser diferentes
-
 pred UnicoEventoSala{
 	all disj e1, e2: Evento | e1.sala = e2.sala implies e1.horario != e2.horario
 }
