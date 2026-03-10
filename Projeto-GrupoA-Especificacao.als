@@ -1,6 +1,8 @@
 -- Sistema para gerenciamento de Eventos acadêmicos
-
+---------------------
 --(1) Assinatura 
+----------------------
+
  sig Evento{
 	organizador: one Professor,--exatamente 1 organizador  
 	sala: one Sala, --  exatamente 1 sala 
@@ -61,15 +63,66 @@ all e : Evento, p : Participante  | not (p in e.inscritos and p in e.listaDeEspe
 }
 
 fact{
-	DuplicidadeDeInscricaes
-	ListaEsperaSoQuandoLotado 
-	InscricaoParticipantes 
-	VagasLimidada 
-	UnicoEventoSala 
-	MaximoDeVagaPositivo 
 	UnicoProfessorEmUmEvento 
-
+	MaximoDeVagaPositivo 
+	UnicoEventoSala
+	VagasLimidada 
+	InscricaoParticipantes 
+	ListaEsperaSoQuandoLotado 
+	DuplicidadeDeInscricaes
 }
+
+---------------------------------------------------------------------
+--ASSERT(verificar se existe algum contra exemplo)
+---------------------------------------------------------------------
+
+-- Verifica se há participantes inscritos em eventos com conflito de horário
+assert naoHaConflitoParaInscritos {
+	all p: Participante, disj e1, e2: Evento |
+		p in e1.inscritos and p in e2.inscritos implies e1.horario != e2.horario
+}
+
+-- Verifica se a lista de espera está vazia quando ainda há vagas
+assert listaDeEsperaSemVagas {
+	all e: Evento |
+		#e.inscritos < e.maxVagas implies no e.listaDeEspera
+}
+
+-- Verifica se professores estão livres de conflitos de horário
+assert professorSemConflito {
+	all disj e1, e2: Evento |
+		e1.organizador = e2.organizador implies e1.horario != e2.horario
+}
+
+-- Verifica se salas não abrigam dois eventos no mesmo horário
+assert salaSemConflito {
+	all disj e1, e2: Evento |
+		e1.sala = e2.sala implies e1.horario != e2.horario
+}
+
+-- Verifica se o limite de vagas é respeitado
+assert respeitoAoLimiteDeVagas {
+	all e: Evento | 
+		#e.inscritos <= e.maxVagas
+}
+
+-- Verifica se um participante nunca esta em ambos os estados no mesmo evento
+assert semDuplicidadeInscricaoEspera {
+	all e: Evento, p: Participante | 
+		p in e.inscritos implies p not in e.listaDeEspera
+}
+
+
+--------------------------------------------------
+-- CHECKS & EXECUÇÃO
+--------------------------------------------------
+check naoHaConflitoParaInscritos for 5
+check listaDeEsperaSemVagas for 5
+check professorSemConflito for 5
+check salaSemConflito for 5
+check respeitoAoLimiteDeVagas for 5
+check semDuplicidadeInscricaoEspera for 5
+
 
 
 --TODAS as inscrições devem ter participante e evento associado.
